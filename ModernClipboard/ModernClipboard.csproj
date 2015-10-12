@@ -46,7 +46,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClipboardData.cs" />
+    <Compile Include="ClipboardFormat.cs" />
+    <Compile Include="ClipboardObject.cs" />
+    <Compile Include="ClipboardManager.cs" />
     <Compile Include="ClipboardMonitor.cs" />
     <Compile Include="FrmMain.cs">
       <SubType>Form</SubType>
@@ -56,6 +58,7 @@
     </Compile>
     <Compile Include="ListEx.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="FrmMain.resx">
       <DependentUpon>FrmMain.cs</DependentUpon>

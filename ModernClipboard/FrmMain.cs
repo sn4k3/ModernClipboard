@@ -8,21 +8,16 @@ namespace ModernClipboard
         public FrmMain()
         {
             InitializeComponent();
-            Disposed += (sender, args) => ClipboardMonitor.Stop();
+            Disposed += (sender, args) => ClipboardManager.Instance.Dispose();
         }
 
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            ClipboardMonitor.OnClipboardChange += ClipboardMonitor_OnClipboardChange;
-            ClipboardMonitor.Start();
+            ClipboardManager.Instance.Init();
         }
 
         
-        private void ClipboardMonitor_OnClipboardChange(ClipboardFormat format, object data)
-        {
-            MessageBox.Show($"{format}\n{data}");
 
-        }
     }
 }
