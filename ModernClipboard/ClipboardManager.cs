@@ -14,6 +14,8 @@ namespace ModernClipboard
         /// </summary>
         public bool Disposed { get; private set; }
 
+        public int CurrentIndex { get; set; }
+
         /// <summary>
         /// Gets a list of the clipboard objects in memory
         /// </summary>
@@ -21,7 +23,7 @@ namespace ModernClipboard
         /// <summary>
         /// Gets a list of the clipboard objects in memory
         /// </summary>
-        public ListEx<ClipboardObject> ClipboardObjects { get; private set; }
+        public ListEx<ClipboardObject> ClipboardObjects { get; }
 
         /// <summary>
         /// Gets the currently clipboard object in memory
@@ -50,6 +52,17 @@ namespace ModernClipboard
                     get { return _sessionClips; }
             private set { _sessionClips = value; OnPropertyChanged(); }
         }
+
+        /// <summary>
+        /// Gets the item count into ClipboardObjects list
+        /// </summary>
+        public int Clips => ClipboardObjects.Count;
+
+        /// <summary>
+        /// Gets the item count into ClipboardObjects list
+        /// </summary>
+        public int Count => ClipboardObjects.Count;
+
         #endregion
 
         #region Singleton
@@ -93,7 +106,8 @@ namespace ModernClipboard
         public void Init() {}
         #endregion
 
-        #region Methods
+        #region Events
+
         /// <summary>
         /// Clipboard has changed - event
         /// </summary>
@@ -104,16 +118,95 @@ namespace ModernClipboard
             var clipboardObject = new ClipboardObject(format, data);
             if (LastClipboardObject != null && LastClipboardObject.Equals(clipboardObject))
                 return; // Same clipboard as the last one, ignoring!
-            
+
+            CurrentIndex = Count;
 
             ClipboardObjects.Add(clipboardObject);
             OnPropertyChanged(nameof(ClipboardObjects));
 
             LastClipboardObject = clipboardObject;
             SessionClips++;
-
-            MessageBox.Show(LastClipboardObject.ToString());
         }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        #endregion
+
+        #region Methods
+
+        public bool CanGoOldest()
+        {
+            return Count > 1 && CurrentIndex != 0;
+        }
+
+        public ClipboardObject GoOldest(bool peek = false)
+        {
+            if (!CanGoOldest())
+                return null;
+
+            if (peek)
+                return ClipboardObjects[0];
+
+            CurrentIndex = 0;
+            return ClipboardObjects[CurrentIndex];
+        }
+
+        public bool CanGoBack()
+        {
+            return Count > 1 && CurrentIndex > 0;
+        }
+
+        public ClipboardObject GoBack(bool peek = false)
+        {
+            if (!CanGoBack())
+                return null;
+
+            if (peek)
+                return ClipboardObjects[CurrentIndex-1];
+
+            CurrentIndex--;
+            return ClipboardObjects[CurrentIndex];
+        }
+
+        public bool CanGoForward()
+        {
+            return Count > 1 && CurrentIndex < Count-1;
+        }
+
+        public ClipboardObject GoForward(bool peek = false)
+        {
+            if (!CanGoForward())
+                return null;
+
+            if (peek)
+                return ClipboardObjects[CurrentIndex + 1];
+
+            CurrentIndex++;
+            return ClipboardObjects[CurrentIndex];
+        }
+
+        public bool CanGoNewest()
+        {
+            return Count > 1 && CurrentIndex != Count - 1;
+        }
+
+        public ClipboardObject GoNewest(bool peek = false)
+        {
+            if (CurrentIndex == 0)
+                return null;
+
+            if (peek)
+                return ClipboardObjects[Count - 1];
+
+            CurrentIndex = Count - 1;
+            return ClipboardObjects[CurrentIndex];
+        }
+
         #endregion
 
         #region Dispose
@@ -130,15 +223,6 @@ namespace ModernClipboard
         }
         #endregion
 
-        #region events
         
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        [NotifyPropertyChangedInvocator]
-        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-        #endregion
     }
 }
