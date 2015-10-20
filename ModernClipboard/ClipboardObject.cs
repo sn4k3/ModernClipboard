@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
@@ -22,6 +23,8 @@ namespace ModernClipboard
 
         public string Text { get; }
 
+        public byte[] Checksum { get; }
+
         public DateTime ClipDateTime { get; }
 
         #region Constructor
@@ -41,6 +44,7 @@ namespace ModernClipboard
             if (text != null)
             {
                 Key = $"Text[{text.Length}]";
+                Checksum = ChecksumMD5.ComputeChecksum(text);
                 return;
             }
 
@@ -52,13 +56,15 @@ namespace ModernClipboard
                 {
                     Text = $"\"{string.Join("\",\n\"", strings)}\"";
                 }
+                Checksum = ChecksumMD5.ComputeChecksum(strings);
                 return;
             }
-            var bitmaps = data as Bitmap;
-            if (bitmaps != null)
+            var bitmap = data as Bitmap;
+            if (bitmap != null)
             {
                 
-                Key = $"Bitmap[{bitmaps.Size.Width}x{bitmaps.Size.Height}]";
+                Key = $"Bitmap[{bitmap.Size.Width}x{bitmap.Size.Height}]";
+                Checksum = ChecksumMD5.ComputeChecksum(bitmap);
                 return;
             }
         }
@@ -75,6 +81,15 @@ namespace ModernClipboard
 
             if (Data.GetType() != other.Data.GetType() || !Equals(Key, other.Key))
                 return false;
+
+            if (Checksum != null && other.Checksum != null)
+            {
+                if (Checksum.LongLength != other.Checksum.LongLength)
+                    return false;
+
+                if (Checksum.SequenceEqual(other.Checksum))
+                    return true;
+            }
 
             var strings = other.Data as string[];
             if (strings != null)
@@ -102,7 +117,7 @@ namespace ModernClipboard
 
                 try
                 {
-                    if ((thisData.Width != otherData.Width && thisData.Height != otherData.Height) || thisData.PixelFormat != otherData.PixelFormat)
+                    if (thisData.Size != otherData.Size || thisData.PixelFormat != otherData.PixelFormat)
                         return false;
                 }
                 catch (Exception)
@@ -142,7 +157,7 @@ namespace ModernClipboard
         /// <returns></returns>
         public override string ToString()
         {
-            return $"{Format}=>{Key}";
+            return $"{Format} => {Key}";
         }
         #endregion
     }

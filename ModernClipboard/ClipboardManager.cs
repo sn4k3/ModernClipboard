@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Windows.Forms;
 using ModernClipboard.Annotations;
 
 namespace ModernClipboard
@@ -91,7 +91,7 @@ namespace ModernClipboard
         {
             ClipboardObjects = new ListEx<ClipboardObject>();
             ClipboardMonitor.OnClipboardChange += ClipboardMonitor_OnClipboardChange;
-            ClipboardMonitor.Start();
+            Start();
         }
 
         // Finalizer simply calls Dispose(false)
@@ -119,9 +119,19 @@ namespace ModernClipboard
             if (LastClipboardObject != null && LastClipboardObject.Equals(clipboardObject))
                 return; // Same clipboard as the last one, ignoring!
 
-            CurrentIndex = Count;
+            CurrentIndex = 0;
 
-            ClipboardObjects.Add(clipboardObject);
+            var item = Find(clipboardObject);
+            if (item != null)
+            {
+                ClipboardObjects.Remove(clipboardObject);
+                ClipboardObjects.Enqueue(clipboardObject);
+            }
+            else
+            {
+                ClipboardObjects.Enqueue(clipboardObject);
+            }
+            
             OnPropertyChanged(nameof(ClipboardObjects));
 
             LastClipboardObject = clipboardObject;
@@ -138,6 +148,9 @@ namespace ModernClipboard
         #endregion
 
         #region Methods
+
+        public void Start() => ClipboardMonitor.Start();
+        public void Stop() => ClipboardMonitor.Stop();
 
         public bool CanGoOldest()
         {
@@ -197,7 +210,7 @@ namespace ModernClipboard
 
         public ClipboardObject GoNewest(bool peek = false)
         {
-            if (CurrentIndex == 0)
+            if (!CanGoNewest())
                 return null;
 
             if (peek)
@@ -205,6 +218,28 @@ namespace ModernClipboard
 
             CurrentIndex = Count - 1;
             return ClipboardObjects[CurrentIndex];
+        }
+
+        /// <summary>
+        /// Find an clip matching a checksum
+        /// </summary>
+        /// <param name="Checksum">Checksum to find</param>
+        /// <returns><see cref="ClipboardObject"/> or null</returns>
+        public ClipboardObject Find(byte[] Checksum)
+        {
+            var result = ClipboardObjects.AsParallel().FirstOrDefault(clip => clip.Checksum.SequenceEqual(Checksum));
+            return result;
+        }
+
+        /// <summary>
+        /// Find an clip matching a checksum
+        /// </summary>
+        /// <param name="clipitem">Checksum to find</param>
+        /// <returns><see cref="ClipboardObject"/> or null</returns>
+        public ClipboardObject Find(ClipboardObject clipitem)
+        {
+            var result = ClipboardObjects.AsParallel().FirstOrDefault(clip => clip.Checksum.SequenceEqual(clipitem.Checksum));
+            return result;
         }
 
         #endregion
@@ -217,7 +252,7 @@ namespace ModernClipboard
         {
             if (Disposed)
                 return;
-            ClipboardMonitor.Stop();
+            Stop();
             Disposed = true;
             GC.SuppressFinalize(this);
         }

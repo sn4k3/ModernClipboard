@@ -45,8 +45,25 @@
             this.cmNotifyClips = new System.Windows.Forms.ToolStripMenuItem();
             this.cmNotifyExit = new System.Windows.Forms.ToolStripMenuItem();
             this.pbBitmap = new System.Windows.Forms.PictureBox();
+            this.panelMain = new System.Windows.Forms.Panel();
+            this.statusBar = new System.Windows.Forms.StatusStrip();
+            this.statusClips = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolbar = new System.Windows.Forms.ToolStrip();
+            this.toolbarOldest = new System.Windows.Forms.ToolStripButton();
+            this.toolbarBack = new System.Windows.Forms.ToolStripButton();
+            this.toolbarForward = new System.Windows.Forms.ToolStripButton();
+            this.toolbarNewest = new System.Windows.Forms.ToolStripButton();
+            this.mainMenu = new System.Windows.Forms.MenuStrip();
+            this.mainMenuFile = new System.Windows.Forms.ToolStripMenuItem();
+            this.mainMenuExit = new System.Windows.Forms.ToolStripMenuItem();
+            this.mainMenuHelp = new System.Windows.Forms.ToolStripMenuItem();
+            this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cmNotify.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbBitmap)).BeginInit();
+            this.panelMain.SuspendLayout();
+            this.statusBar.SuspendLayout();
+            this.toolbar.SuspendLayout();
+            this.mainMenu.SuspendLayout();
             this.SuspendLayout();
             // 
             // lbClips
@@ -55,18 +72,19 @@
             this.lbClips.FormattingEnabled = true;
             this.lbClips.Location = new System.Drawing.Point(0, 0);
             this.lbClips.Name = "lbClips";
-            this.lbClips.Size = new System.Drawing.Size(269, 552);
+            this.lbClips.Size = new System.Drawing.Size(192, 481);
             this.lbClips.TabIndex = 0;
             this.lbClips.SelectedIndexChanged += new System.EventHandler(this.lbClips_SelectedIndexChanged);
+            this.lbClips.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.OnMouseDoubleClick);
             // 
             // tbData
             // 
             this.tbData.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tbData.Location = new System.Drawing.Point(269, 0);
+            this.tbData.Location = new System.Drawing.Point(192, 0);
             this.tbData.Name = "tbData";
             this.tbData.ReadOnly = true;
             this.tbData.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.ForcedBoth;
-            this.tbData.Size = new System.Drawing.Size(725, 552);
+            this.tbData.Size = new System.Drawing.Size(802, 481);
             this.tbData.TabIndex = 1;
             this.tbData.Text = "";
             // 
@@ -121,6 +139,7 @@
             this.cmNotifyOldest.Name = "cmNotifyOldest";
             this.cmNotifyOldest.Size = new System.Drawing.Size(132, 22);
             this.cmNotifyOldest.Text = "&Oldest";
+            this.cmNotifyOldest.Click += new System.EventHandler(this.Clicked);
             // 
             // cmNotifyBack
             // 
@@ -128,6 +147,7 @@
             this.cmNotifyBack.Name = "cmNotifyBack";
             this.cmNotifyBack.Size = new System.Drawing.Size(132, 22);
             this.cmNotifyBack.Text = "&Back";
+            this.cmNotifyBack.Click += new System.EventHandler(this.Clicked);
             // 
             // cmNotifyForward
             // 
@@ -135,6 +155,7 @@
             this.cmNotifyForward.Name = "cmNotifyForward";
             this.cmNotifyForward.Size = new System.Drawing.Size(132, 22);
             this.cmNotifyForward.Text = "&Forward";
+            this.cmNotifyForward.Click += new System.EventHandler(this.Clicked);
             // 
             // cmNotifyNewest
             // 
@@ -142,6 +163,7 @@
             this.cmNotifyNewest.Name = "cmNotifyNewest";
             this.cmNotifyNewest.Size = new System.Drawing.Size(132, 22);
             this.cmNotifyNewest.Text = "&Newest";
+            this.cmNotifyNewest.Click += new System.EventHandler(this.Clicked);
             // 
             // toolStripSeparator1
             // 
@@ -168,26 +190,155 @@
             // pbBitmap
             // 
             this.pbBitmap.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pbBitmap.Location = new System.Drawing.Point(269, 0);
+            this.pbBitmap.Location = new System.Drawing.Point(192, 0);
             this.pbBitmap.Name = "pbBitmap";
-            this.pbBitmap.Size = new System.Drawing.Size(725, 552);
+            this.pbBitmap.Size = new System.Drawing.Size(802, 481);
             this.pbBitmap.TabIndex = 2;
             this.pbBitmap.TabStop = false;
+            // 
+            // panelMain
+            // 
+            this.panelMain.Controls.Add(this.pbBitmap);
+            this.panelMain.Controls.Add(this.tbData);
+            this.panelMain.Controls.Add(this.lbClips);
+            this.panelMain.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelMain.Location = new System.Drawing.Point(0, 49);
+            this.panelMain.Name = "panelMain";
+            this.panelMain.Size = new System.Drawing.Size(994, 481);
+            this.panelMain.TabIndex = 3;
+            // 
+            // statusBar
+            // 
+            this.statusBar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.statusClips});
+            this.statusBar.Location = new System.Drawing.Point(0, 530);
+            this.statusBar.Name = "statusBar";
+            this.statusBar.Size = new System.Drawing.Size(994, 22);
+            this.statusBar.SizingGrip = false;
+            this.statusBar.TabIndex = 4;
+            this.statusBar.Text = "Status Bar";
+            // 
+            // statusClips
+            // 
+            this.statusClips.Name = "statusClips";
+            this.statusClips.Size = new System.Drawing.Size(45, 17);
+            this.statusClips.Text = "Clips: 0";
+            // 
+            // toolbar
+            // 
+            this.toolbar.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolbar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolbarOldest,
+            this.toolbarBack,
+            this.toolbarForward,
+            this.toolbarNewest});
+            this.toolbar.Location = new System.Drawing.Point(0, 24);
+            this.toolbar.Name = "toolbar";
+            this.toolbar.Size = new System.Drawing.Size(994, 25);
+            this.toolbar.TabIndex = 5;
+            this.toolbar.Text = "Toolbar";
+            // 
+            // toolbarOldest
+            // 
+            this.toolbarOldest.Image = global::ModernClipboard.Properties.Resources.first16x16;
+            this.toolbarOldest.Name = "toolbarOldest";
+            this.toolbarOldest.Size = new System.Drawing.Size(61, 22);
+            this.toolbarOldest.Text = "&Oldest";
+            this.toolbarOldest.ToolTipText = "Go to Oldest clip";
+            this.toolbarOldest.Click += new System.EventHandler(this.Clicked);
+            // 
+            // toolbarBack
+            // 
+            this.toolbarBack.Image = global::ModernClipboard.Properties.Resources.back16x16;
+            this.toolbarBack.Name = "toolbarBack";
+            this.toolbarBack.Size = new System.Drawing.Size(52, 22);
+            this.toolbarBack.Text = "&Back";
+            this.toolbarBack.ToolTipText = "Go to Previous clip";
+            this.toolbarBack.Click += new System.EventHandler(this.Clicked);
+            // 
+            // toolbarForward
+            // 
+            this.toolbarForward.Image = global::ModernClipboard.Properties.Resources.forward16x16;
+            this.toolbarForward.Name = "toolbarForward";
+            this.toolbarForward.Size = new System.Drawing.Size(70, 22);
+            this.toolbarForward.Text = "&Forward";
+            this.toolbarForward.ToolTipText = "Go to Forward clip";
+            this.toolbarForward.Click += new System.EventHandler(this.Clicked);
+            // 
+            // toolbarNewest
+            // 
+            this.toolbarNewest.Image = global::ModernClipboard.Properties.Resources.last16x16;
+            this.toolbarNewest.Name = "toolbarNewest";
+            this.toolbarNewest.Size = new System.Drawing.Size(66, 22);
+            this.toolbarNewest.Text = "&Newest";
+            this.toolbarNewest.ToolTipText = "Go to Newest clip";
+            this.toolbarNewest.Click += new System.EventHandler(this.Clicked);
+            // 
+            // mainMenu
+            // 
+            this.mainMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mainMenuFile,
+            this.mainMenuHelp});
+            this.mainMenu.Location = new System.Drawing.Point(0, 0);
+            this.mainMenu.Name = "mainMenu";
+            this.mainMenu.Size = new System.Drawing.Size(994, 24);
+            this.mainMenu.TabIndex = 6;
+            this.mainMenu.Text = "menuStrip1";
+            // 
+            // mainMenuFile
+            // 
+            this.mainMenuFile.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mainMenuExit});
+            this.mainMenuFile.Name = "mainMenuFile";
+            this.mainMenuFile.Size = new System.Drawing.Size(37, 20);
+            this.mainMenuFile.Text = "&File";
+            // 
+            // mainMenuExit
+            // 
+            this.mainMenuExit.Image = global::ModernClipboard.Properties.Resources.exit16x16;
+            this.mainMenuExit.Name = "mainMenuExit";
+            this.mainMenuExit.Size = new System.Drawing.Size(92, 22);
+            this.mainMenuExit.Text = "&Exit";
+            this.mainMenuExit.Click += new System.EventHandler(this.Clicked);
+            // 
+            // mainMenuHelp
+            // 
+            this.mainMenuHelp.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.aboutToolStripMenuItem});
+            this.mainMenuHelp.Name = "mainMenuHelp";
+            this.mainMenuHelp.Size = new System.Drawing.Size(44, 20);
+            this.mainMenuHelp.Text = "&Help";
+            // 
+            // aboutToolStripMenuItem
+            // 
+            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
+            this.aboutToolStripMenuItem.Text = "&About";
             // 
             // FrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(994, 552);
-            this.Controls.Add(this.pbBitmap);
-            this.Controls.Add(this.tbData);
-            this.Controls.Add(this.lbClips);
+            this.Controls.Add(this.panelMain);
+            this.Controls.Add(this.statusBar);
+            this.Controls.Add(this.toolbar);
+            this.Controls.Add(this.mainMenu);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MainMenuStrip = this.mainMenu;
             this.Name = "FrmMain";
             this.Text = "Modern Clipboard";
             this.cmNotify.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pbBitmap)).EndInit();
+            this.panelMain.ResumeLayout(false);
+            this.statusBar.ResumeLayout(false);
+            this.statusBar.PerformLayout();
+            this.toolbar.ResumeLayout(false);
+            this.toolbar.PerformLayout();
+            this.mainMenu.ResumeLayout(false);
+            this.mainMenu.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -208,6 +359,19 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem cmNotifyNavigation;
         private System.Windows.Forms.ToolStripMenuItem cmNotifyClips;
+        private System.Windows.Forms.Panel panelMain;
+        private System.Windows.Forms.StatusStrip statusBar;
+        private System.Windows.Forms.ToolStrip toolbar;
+        private System.Windows.Forms.MenuStrip mainMenu;
+        private System.Windows.Forms.ToolStripMenuItem mainMenuFile;
+        private System.Windows.Forms.ToolStripButton toolbarOldest;
+        private System.Windows.Forms.ToolStripButton toolbarBack;
+        private System.Windows.Forms.ToolStripButton toolbarForward;
+        private System.Windows.Forms.ToolStripButton toolbarNewest;
+        private System.Windows.Forms.ToolStripMenuItem mainMenuExit;
+        private System.Windows.Forms.ToolStripMenuItem mainMenuHelp;
+        private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
+        private System.Windows.Forms.ToolStripStatusLabel statusClips;
     }
 }
 

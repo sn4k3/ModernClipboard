@@ -7,6 +7,11 @@ namespace ModernClipboard
 {
     public static class ClipboardMonitor
     {
+        public static bool IsStarted => ClipboardWatcher.IsStarted;
+        public static bool IsPaused {
+            get { return ClipboardWatcher.IsPaused;  }
+            set { ClipboardWatcher.IsPaused = value; }
+        }
         public delegate void OnClipboardChangeEventHandler(ClipboardFormat format, object data);
         public static event OnClipboardChangeEventHandler OnClipboardChange;
 
@@ -27,6 +32,9 @@ namespace ModernClipboard
 
         class ClipboardWatcher : Form
         {
+            public static bool IsStarted => _mInstance != null;
+            public static bool IsPaused { get; set; }
+
             // static instance of this form
             private static ClipboardWatcher _mInstance;
 
@@ -43,7 +51,7 @@ namespace ModernClipboard
                 if (_mInstance != null)
                     return;
 
-                var t = new Thread(new ParameterizedThreadStart(x => Application.Run(new ClipboardWatcher())));
+                var t = new Thread(x => Application.Run(new ClipboardWatcher()));
                 t.SetApartmentState(ApartmentState.STA); // give the [STAThread] attribute
                 t.Start();
             }
@@ -83,14 +91,17 @@ namespace ModernClipboard
             [DllImport("user32.dll", CharSet = CharSet.Auto)]
             private static extern int SendMessage(IntPtr hwnd, int wMsg, IntPtr wParam, IntPtr lParam);
 
-            [DllImport("user32.dll")]
+            /*[DllImport("user32.dll")]
             private static extern bool OpenClipboard(IntPtr hWndNewOwner);
+
+            [DllImport("user32.dll")]
+            static extern bool EmptyClipboard();
 
             [DllImport("user32.dll")]
             private static extern bool CloseClipboard();
 
             [DllImport("user32.dll")]
-            private static extern IntPtr SetClipboardData(uint uFormat, IntPtr hMem);
+            private static extern IntPtr SetClipboardData(uint uFormat, IntPtr hMem);*/
 
             // defined in winuser.h
             const int WM_DRAWCLIPBOARD = 0x308;
@@ -122,6 +133,8 @@ namespace ModernClipboard
 
             private void ClipChanged()
             {
+                if (IsPaused) return;
+
                 IDataObject iData = Clipboard.GetDataObject();
 
                 ClipboardFormat? format = null;

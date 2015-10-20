@@ -3,11 +3,16 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Reflection;
 using System.Windows.Forms;
+using Gma.System.MouseKeyHook;
 
 namespace ModernClipboard
 {
     public partial class FrmMain : Form
     {
+        #region Variables
+        private IKeyboardMouseEvents m_GlobalHook;
+        #endregion
+
         #region Properties
         /// <summary>
         /// Gets if form can be closed, if false form will be hidden
@@ -21,8 +26,20 @@ namespace ModernClipboard
         public FrmMain()
         {
             InitializeComponent();
-            Disposed += (sender, args) => ClipboardManager.Instance.Dispose();
+            m_GlobalHook = Hook.GlobalEvents();
+            m_GlobalHook.KeyDown += GlobalHookKeyDown;
+
+            Disposed += (sender, args) =>
+            {
+                m_GlobalHook.Dispose();
+                ClipboardManager.Instance.Dispose();
+            };
+
+           
         }
+
+
+
         #endregion
 
         #region Overrides
@@ -31,6 +48,7 @@ namespace ModernClipboard
             base.OnLoad(e);
             ClipboardManager.Instance.Init();
             ClipboardManager.Instance.PropertyChanged += ClipboardManager_OnPropertyChanged;
+            lbClips.DataSource = ClipboardManager.Instance.ClipboardObjects;
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
@@ -68,6 +86,10 @@ namespace ModernClipboard
         #endregion
 
         #region Events
+        private void GlobalHookKeyDown(object sender, KeyEventArgs e)
+        {
+            
+        }
 
         private void ClipboardManager_OnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
@@ -83,12 +105,16 @@ namespace ModernClipboard
             if (e.PropertyName.Equals("SessionClips"))
             {
                 var lastSelectedIndex = lbClips.SelectedIndex;
-                lbClips.BeginUpdate();
+                /*lbClips.BeginUpdate();
 
                 lbClips.Items.Insert(0, ClipboardManager.Instance.LastClipboardObject);
                 lbClips.SelectedIndex = 0;
 
-                lbClips.EndUpdate();
+                lbClips.EndUpdate();*/
+                lbClips.DataSource = null;
+                lbClips.DataSource = ClipboardManager.Instance.ClipboardObjects;
+                if(ClipboardManager.Instance.ClipboardObjects.Count > 0)
+                    lbClips.SelectedIndex = 0;
 
                 ToolStripMenuItem item = new ToolStripMenuItem(ClipboardManager.Instance.LastClipboardObject.ToString())
                 {
@@ -113,7 +139,10 @@ namespace ModernClipboard
                 cmNotifyNewest.Text = $"&Newest - {ClipboardManager.Instance.LastClipboardObject.Key}";
                 cmNotifyNavigation.Text = $"Navigation ({ClipboardManager.Instance.Count})";
                 cmNotifyClips.Text = $"Clips: {ClipboardManager.Instance.Count}";
-                
+
+                //statusClips.Text = $"Total of {ClipboardManager.Instance.Count} clips and {ClipboardManager.Instance.SessionClips} for this session";
+                statusClips.Text = $"Clips: {ClipboardManager.Instance.Count}";
+
                 return;
             }
         }
@@ -123,6 +152,8 @@ namespace ModernClipboard
             var item = lbClips.SelectedItem as ClipboardObject;
             if (item == null)
                 return;
+
+            ClipboardManager.Instance.CurrentIndex = lbClips.Items.Count - 1 - lbClips.SelectedIndex;
 
             UpdateButtonVisibility();
 
@@ -153,7 +184,7 @@ namespace ModernClipboard
                 ShowMe();
                 return;
             }
-            if (sender == cmNotifyExit)
+            if (sender == mainMenuExit || sender == cmNotifyExit)
             {
                 CanClose = true;
                 Close();
@@ -194,11 +225,41 @@ namespace ModernClipboard
         {
             cmNotifyNavigation.Enabled = ClipboardManager.Instance.Count > 0;
 
+            toolbarOldest.Enabled =
             cmNotifyOldest.Enabled = ClipboardManager.Instance.CanGoOldest();
+            cmNotifyOldest.Text = $"&Oldest{(cmNotifyOldest.Enabled ? $" - {ClipboardManager.Instance.GoOldest(true).Key}" : string.Empty)}";
+
+            toolbarBack.Enabled =
             cmNotifyBack.Enabled = ClipboardManager.Instance.CanGoBack();
+            cmNotifyBack.Text = $"&Back{(cmNotifyBack.Enabled ? $" - {ClipboardManager.Instance.GoBack(true).Key}" : string.Empty)}";
+
+            toolbarForward.Enabled =
             cmNotifyForward.Enabled = ClipboardManager.Instance.CanGoForward();
+            cmNotifyForward.Text = $"&Forward{(cmNotifyForward.Enabled ? $" - {ClipboardManager.Instance.GoForward(true).Key}" : string.Empty)}";
+
+            toolbarNewest.Enabled =
             cmNotifyNewest.Enabled = ClipboardManager.Instance.CanGoNewest();
+            cmNotifyNewest.Text = $"&Newest{(cmNotifyNewest.Enabled ? $" - {ClipboardManager.Instance.GoNewest(true).Key}" : string.Empty)}";
         }
         #endregion
+
+        private void OnMouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (sender == lbClips)
+            {
+                if (e.Button != MouseButtons.Left) return;
+
+                var clip = lbClips.SelectedItem as ClipboardObject;
+                if (clip == null) return;
+
+                DataObject m_data = new DataObject();
+                //m_data.SetData(DataFormats.Text, true, textBox1.Text);
+                //m_data.SetData(DataFormats.Bitmap, true, pictureBox1.Image);
+                m_data.SetData(clip.Format.ToString(), true, clip.Data);
+                Clipboard.SetDataObject(m_data, true);
+
+                return;
+            }
+        }
     }
 }
